@@ -1,238 +1,282 @@
 import java.util.*;
 
-public class EventManagementWebsite {
+class Event {
 
-    static class Event {
-        int id;
-        String name;
-        String venue;
-        double price;
+	String name;
+	String date;
+	String guests;
+	int budget;
 
-        Event(int id,String name,String venue,double price){
-            this.id=id;
-            this.name=name;
-            this.venue=venue;
-            this.price=price;
-        }
+	Event(String name, String date, String guests, int budget) {
 
-        public String toString(){
-            return id+" | "+name+" | "+venue+" | "+price;
-        }
-    }
+		this.name = name;
+		this.date = date;
+		this.guests = guests;
+		this.budget = budget;
 
-    static class Node{
-        Event data;
-        Node next;
+	}
 
-        Node(Event e){
-            data=e;
-        }
-    }
+}
 
-    static class EventList{
+public class EventSphere {
 
-        Node head;
+	static Scanner sc = new Scanner(System.in);
 
-        void addEvent(Event e){
+	// HashMap for users
+	static HashMap<String,String> users = new HashMap<>();
 
-            Node newNode=new Node(e);
+	// ArrayList for event packages
+	static ArrayList<Event> packages = new ArrayList<>();
 
-            if(head==null){
-                head=newNode;
-                return;
-            }
+	// Queue for bookings
+	static Queue<Event> bookingQueue = new LinkedList<>();
 
-            Node temp=head;
+	// Stack for history
+	static Stack<Event> bookingHistory = new Stack<>();
 
-            while(temp.next!=null)
-                temp=temp.next;
+	public static void main(String[] args) {
 
-            temp.next=newNode;
-        }
+		initializePackages();
 
-        void displayEvents(){
+		while(true){
 
-            Node temp=head;
+			System.out.println("\n===== EventSphere =====");
+			System.out.println("1 Signup");
+			System.out.println("2 Login");
+			System.out.println("3 Exit");
 
-            while(temp!=null){
-                System.out.println(temp.data);
-                temp=temp.next;
-            }
-        }
+			int choice = sc.nextInt();
+			sc.nextLine();
 
-        Event search(String name){
+			switch(choice){
 
-            Node temp=head;
+				case 1:
+					signup();
+					break;
 
-            while(temp!=null){
+				case 2:
+					if(login()){
+						userMenu();
+					}
+					break;
 
-                if(temp.data.name.equalsIgnoreCase(name))
-                    return temp.data;
+				case 3:
+					System.exit(0);
 
-                temp=temp.next;
-            }
+			}
 
-            return null;
-        }
+		}
 
-        List<Event> toArray(){
+	}
 
-            List<Event> list=new ArrayList<>();
+	// SIGNUP
 
-            Node temp=head;
+	static void signup(){
 
-            while(temp!=null){
-                list.add(temp.data);
-                temp=temp.next;
-            }
+		System.out.print("Enter Email: ");
+		String email = sc.nextLine();
 
-            return list;
-        }
-    }
+		System.out.print("Enter Password: ");
+		String pass = sc.nextLine();
 
-    static void bubbleSort(List<Event> list){
+		users.put(email,pass);
 
-        int n=list.size();
+		System.out.println("Signup Successful");
 
-        for(int i=0;i<n-1;i++){
+	}
 
-            for(int j=0;j<n-i-1;j++){
+	// LOGIN
 
-                if(list.get(j).price > list.get(j+1).price){
+	static boolean login(){
 
-                    Event temp=list.get(j);
-                    list.set(j,list.get(j+1));
-                    list.set(j+1,temp);
+		System.out.print("Enter Email: ");
+		String email = sc.nextLine();
 
-                }
-            }
-        }
-    }
+		System.out.print("Enter Password: ");
+		String pass = sc.nextLine();
 
-    static Queue<Event> bookingQueue=new LinkedList<>();
+		if(users.containsKey(email) && users.get(email).equals(pass)){
 
-    static Stack<Event> undoStack=new Stack<>();
+			System.out.println("Login Successful");
+			return true;
 
-    static HashMap<Integer,Event> eventMap=new HashMap<>();
+		}
 
-    public static void main(String[] args){
+		System.out.println("Invalid Login");
+		return false;
 
-        Scanner sc=new Scanner(System.in);
+	}
 
-        EventList events=new EventList();
+	// USER MENU
 
-        events.addEvent(new Event(1,"Wedding","Grand Hall",50000));
-        events.addEvent(new Event(2,"Birthday","Garden",15000));
-        events.addEvent(new Event(3,"Conference","City Center",30000));
-        events.addEvent(new Event(4,"Concert","Stadium",70000));
+	static void userMenu(){
 
-        eventMap.put(1,new Event(1,"Wedding","Grand Hall",50000));
-        eventMap.put(2,new Event(2,"Birthday","Garden",15000));
-        eventMap.put(3,new Event(3,"Conference","City Center",30000));
-        eventMap.put(4,new Event(4,"Concert","Stadium",70000));
+		while(true){
 
-        while(true){
+			System.out.println("\n===== Home =====");
+			System.out.println("1 View Event Packages");
+			System.out.println("2 Create Custom Event");
+			System.out.println("3 Dashboard");
+			System.out.println("4 Admin Panel");
+			System.out.println("5 Logout");
 
-            System.out.println("\n==== EVENT MANAGEMENT SYSTEM ====");
-            System.out.println("1. View Events");
-            System.out.println("2. Search Event");
-            System.out.println("3. Sort Events by Price");
-            System.out.println("4. Book Event");
-            System.out.println("5. Process Booking");
-            System.out.println("6. Undo Booking");
-            System.out.println("7. Exit");
+			int ch = sc.nextInt();
+			sc.nextLine();
 
-            int choice=sc.nextInt();
-            sc.nextLine();
+			switch(ch){
 
-            switch(choice){
+				case 1:
+					viewPackages();
+					break;
 
-                case 1:
+				case 2:
+					customEvent();
+					break;
 
-                    events.displayEvents();
-                    break;
+				case 3:
+					showDashboard();
+					break;
 
-                case 2:
+				case 4:
+					adminPanel();
+					break;
 
-                    System.out.print("Enter Event Name: ");
-                    String name=sc.nextLine();
+				case 5:
+					return;
 
-                    Event e=events.search(name);
+			}
 
-                    if(e!=null)
-                        System.out.println("Found: "+e);
-                    else
-                        System.out.println("Event not found");
+		}
 
-                    break;
+	}
 
-                case 3:
+	// INITIALIZE PACKAGES (ArrayList)
 
-                    List<Event> list=events.toArray();
+	static void initializePackages(){
 
-                    bubbleSort(list);
+		packages.add(new Event("Wedding Package","-", "Package",500000));
+		packages.add(new Event("Birthday Party","-", "Package",150000));
+		packages.add(new Event("Corporate Event","-", "Package",300000));
 
-                    for(Event ev:list)
-                        System.out.println(ev);
+	}
 
-                    break;
+	// VIEW PACKAGES
 
-                case 4:
+	static void viewPackages(){
 
-                    System.out.print("Enter Event ID: ");
-                    int id=sc.nextInt();
+		System.out.println("\nAvailable Packages:");
 
-                    if(eventMap.containsKey(id)){
+		for(int i=0;i<packages.size();i++){
 
-                        Event book=eventMap.get(id);
+			Event e = packages.get(i);
 
-                        bookingQueue.add(book);
+			System.out.println((i+1)+". "+e.name+" Budget ₹"+e.budget);
 
-                        undoStack.push(book);
+		}
 
-                        System.out.println("Booking Added: "+book.name);
-                    }
-                    else
-                        System.out.println("Invalid Event");
+		System.out.print("Select Package: ");
+		int choice = sc.nextInt();
 
-                    break;
+		Event selected = packages.get(choice-1);
 
-                case 5:
+		Event booking = new Event(selected.name,new Date().toString(),"Package",selected.budget);
 
-                    if(!bookingQueue.isEmpty()){
+		saveBooking(booking);
 
-                        Event processed=bookingQueue.remove();
+	}
 
-                        System.out.println("Booking Processed: "+processed.name);
-                    }
-                    else
-                        System.out.println("No bookings");
+	// CUSTOM EVENT
 
-                    break;
+	static void customEvent(){
 
-                case 6:
+		System.out.print("Event Name: ");
+		String name = sc.nextLine();
 
-                    if(!undoStack.isEmpty()){
+		System.out.print("Guests: ");
+		int guests = sc.nextInt();
 
-                        Event undo=undoStack.pop();
+		System.out.print("Budget: ");
+		int budget = sc.nextInt();
+		sc.nextLine();
 
-                        bookingQueue.remove(undo);
+		System.out.print("Event Date: ");
+		String date = sc.nextLine();
 
-                        System.out.println("Undo Booking: "+undo.name);
-                    }
-                    else
-                        System.out.println("Nothing to undo");
+		int baseCost = guests * 500;
+		int decorCost = 50000;
+		int seatCost = 20000;
 
-                    break;
+		int total = baseCost + decorCost + seatCost;
 
-                case 7:
+		if(budget < total){
 
-                    System.exit(0);
+			System.out.println("Budget too low. Minimum required ₹"+total);
+			return;
 
-                default:
+		}
 
-                    System.out.println("Invalid choice");
-            }
-        }
-    }
+		Event booking = new Event(name,date,String.valueOf(guests),budget);
+
+		saveBooking(booking);
+
+	}
+
+	// SAVE BOOKING (Queue + Stack)
+
+	static void saveBooking(Event e){
+
+		bookingQueue.add(e);
+
+		bookingHistory.push(e);
+
+		System.out.println("Booking Confirmed");
+
+	}
+
+	// DASHBOARD
+
+	static void showDashboard(){
+
+		System.out.println("\n===== Dashboard =====");
+
+		System.out.println("Total Bookings: "+bookingQueue.size());
+
+		int totalBudget = 0;
+
+		for(Event e : bookingQueue){
+
+			totalBudget += e.budget;
+
+		}
+
+		System.out.println("Total Budget Used: ₹"+totalBudget);
+
+		System.out.println("\nBooking History (Latest First)");
+
+		Stack<Event> temp = (Stack<Event>) bookingHistory.clone();
+
+		while(!temp.isEmpty()){
+
+			Event e = temp.pop();
+
+			System.out.println(e.name+" | "+e.date+" | Guests:"+e.guests+" | ₹"+e.budget);
+
+		}
+
+	}
+
+	// ADMIN PANEL
+
+	static void adminPanel(){
+
+		System.out.println("\n===== Admin Panel =====");
+
+		for(Event e : bookingQueue){
+
+			System.out.println(e.name+" | "+e.date+" | Guests:"+e.guests+" | ₹"+e.budget);
+
+		}
+
+	}
+
 }
